@@ -68,12 +68,18 @@ with open("models/label_encoders.pkl", "rb") as f:
 for col,val in encoders.items():
     if col in df.columns:
         df[col]=val.transform(df[col])
+# loading scaler
+# Load scaler later
+
+scaler = joblib.load("models/minmax_scaler.pkl")
+df_scaled= scaler.transform(df)
+df_for_pred = pd.DataFrame(df_scaled, columns=df.columns)
 
 
 def prediction(model,data):
     predict=model.predict(data)
     if predict==0:
-        st.metric('prediction',predict)
+        st.error('Not Promoted')
     else:
-        st.metric('prediction',predict)
-prediction(model,df)
+        st.success('Promoted')
+prediction(model,df_for_pred)
