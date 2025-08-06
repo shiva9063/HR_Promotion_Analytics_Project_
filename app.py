@@ -56,19 +56,16 @@ df=pd.DataFrame({
     'awards_won?':[awards_won],
     'avg_training_score':[avg_training_score]
 })
-
+print(st.dataframe(df))
 object_columns=["department", "education", "gender",'recruitment_channel']
 # loading the model
 model=joblib.load('models/model.h5')
 
 # loading label encoding 
-# --- Load encoders and model ---
-with open("models/label_encoders.pkl", "rb") as f:
-    encoders = pickle.load(f)
-for col,val in encoders.items():
-    if col in df.columns:
-        df[col]=val.transform(df[col])
-# loading scaler
+# --- Load encoders
+or_encoder=joblib.load('models/ordinalencoder.pkl')
+df[object_columns]=or_encoder.transform(df[object_columns])
+
 # Load scaler later
 
 scaler = joblib.load("models/minmax_scaler.pkl")
@@ -78,7 +75,7 @@ df_for_pred = pd.DataFrame(df_scaled, columns=df.columns)
 
 def prediction(model,data):
     predict=model.predict(data)
-    if predict==0:
+    if predict[0]==0:
         st.error('Not Promoted')
     else:
         st.success('Promoted')
